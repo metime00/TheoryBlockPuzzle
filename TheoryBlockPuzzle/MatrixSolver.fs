@@ -46,13 +46,13 @@ let printSolution target blockCount (sol : int list list) =
 
 /// counts the number of solutions
 let rec countMatrixSolutions tree =
-    if tree.matrix = [] then 1
+    if tree.matrixColumns = [] then 1
     elif tree.children = [] then 0
     else List.sumBy (fun x -> countMatrixSolutions x) tree.children
 
 /// returns a list of all complete solutions
 let rec matrixSolutionList tree =
-    if tree.matrix = [] then [tree.partialSolution.Value]
+    if tree.matrixColumns = [] then [tree.partialSolution.Value |> Set.ofList |> Set.toList]
     elif tree.children = [] then []
     else [ for i in tree.children do yield! matrixSolutionList i ]
 
@@ -111,7 +111,7 @@ let iterateX tree =
     ///Returns the next node to perform an iteration of algorithm x on, if there are no partial solutions left, 
     let rec findLeaf node =
         if Option.isNone node.partialSolution then None        
-        elif node.matrix = [] then None
+        elif node.matrixColumns = [] then None
         else
             match node.children with
             | [] -> Some(node)

@@ -1,13 +1,9 @@
+aaaa
+  
+      a   aaa    
+     aa     a        a
+aaa
 
-aba   b   bab    
-     aa     a        b     
-a
-
-bb
- a   aa
-
-
-abbaa
-babab
-bbaaa
+aaaaa
+aaaaa
 aaaaa

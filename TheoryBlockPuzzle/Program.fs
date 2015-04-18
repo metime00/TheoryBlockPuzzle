@@ -39,10 +39,11 @@ let matrixSolveAndPrint (args : string[]) rules =
 
     for i in matrixSolutionList finalTree do
         printSolution target blocks.Length i
+        printfn "%i" i.Length
         printfn ""
 
     timey.Stop ()
-    printfn "\nsolutions: %i, time elapsed: %i" (countMatrixSolutions finalTree) timey.ElapsedMilliseconds
+    printfn "\nsolutions: %i, time elapsed: %i" (matrixSolutionList finalTree |> List.length) timey.ElapsedMilliseconds
     System.Console.ReadKey(true) |> ignore
 
 [<EntryPoint>]
