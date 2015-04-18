@@ -21,6 +21,10 @@ let matrixSolveAndPrint (args : string[]) rules =
     let (matrix, columns) = createMatrix (target, blocks) rules
     printfn "rows: %i" (List.length matrix)
     let initialNode = {matrix = matrix; matrixColumns = columns; children = []; partialSolution = Some([])}
+
+    let timey = System.Diagnostics.Stopwatch.StartNew ()
+
+    /// run and print successive iterations of algorithm x until it completes
     let rec runX node =
         let (nextTree, partialSolution) = iterateX node
         match partialSolution with
@@ -32,7 +36,13 @@ let matrixSolveAndPrint (args : string[]) rules =
         | None ->
             node
     let finalTree = runX initialNode
-    printfn "\n%i" (countMatrixSolutions finalTree)
+
+    for i in matrixSolutionList finalTree do
+        printSolution target blocks.Length i
+        printfn ""
+
+    timey.Stop ()
+    printfn "\nsolutions: %i, time elapsed: %i" (countMatrixSolutions finalTree) timey.ElapsedMilliseconds
     System.Console.ReadKey(true) |> ignore
 
 [<EntryPoint>]

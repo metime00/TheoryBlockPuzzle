@@ -1,17 +1,13 @@
 
-       O  O        O
-   OO  O  O   OO   O  OO        
-  OO   O  O   OO  OO   O        
-   O   O  OO  O   O    OO       
-       O                    O   
-  OOO        O    O     O   O   
-   O   O O   O    OO   OOO  OO  
-   O   OOO   OOO   OO   O   O   
+aba   b   bab    
+     aa     a        b     
+a
 
- OOOOOOOOO
-OOO O O OOO
-O OOOOOOO O
-OOO O O OOO
-O OOOOOOO O
-OOO O O OOO
- OOOOOOOOO
+bb
+ a   aa
+
+
+abbaa
+babab
+bbaaa
+aaaaa

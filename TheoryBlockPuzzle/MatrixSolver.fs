@@ -50,6 +50,12 @@ let rec countMatrixSolutions tree =
     elif tree.children = [] then 0
     else List.sumBy (fun x -> countMatrixSolutions x) tree.children
 
+/// returns a list of all complete solutions
+let rec matrixSolutionList tree =
+    if tree.matrix = [] then [tree.partialSolution.Value]
+    elif tree.children = [] then []
+    else [ for i in tree.children do yield! matrixSolutionList i ]
+
 /// Given a block and a target, gives a list of all the board configurations that can be made by placing the block that won't automatically be wrong, configured as a list of x y coordinates for each placement
 let placeBlocks (block : Tile list) target =
     [
@@ -118,8 +124,10 @@ let iterateX tree =
     | Some(curNode) ->
         /// builds a tree to be returned with one iteration of algorithm x performed on it
         let rec buildTree oldTree node =
-            if oldTree.matrix <> node.matrix then
-                {matrix = oldTree.matrix; matrixColumns = oldTree.matrixColumns; children = [ for i in oldTree.children do yield buildTree i node ]; partialSolution = oldTree.partialSolution }
+            let nextSolIndex = node.partialSolution.Value.Length - oldTree.partialSolution.Value.Length - 1
+            if nextSolIndex <> -1 then
+                let nextSol = node.partialSolution.Value.[nextSolIndex]
+                {matrix = oldTree.matrix; matrixColumns = oldTree.matrixColumns; children = oldTree.children |> List.map (fun x -> match x.partialSolution with Some(head :: _) when head = nextSol -> buildTree x node | _ -> x); partialSolution = oldTree.partialSolution }
             else //perform one iteration of algorithm x
                 let matrixColumnValues = //the number of ones in each column of the current submatrix, corresponding to indices in node.matrixColumns
                     node.matrixColumns
