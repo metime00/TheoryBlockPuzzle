@@ -2,6 +2,28 @@
 open MatrixSolver
 open BlockUtil
 
+let blockLocIsBlock rules blockLoc block =
+    let baseBlock = (block |> List.map (fun (x, c) -> (x, 'c')))
+    let blockConfigs =
+        [
+            if rules.rotationsAllowed && rules.reflectionsAllowed then //handles reflections and reflections of rotations
+                let reflectedBlock = reflect Reflection.X baseBlock
+                yield reflectedBlock
+                yield rotate Rotation.Quarter reflectedBlock
+                yield rotate Rotation.Half reflectedBlock
+                yield rotate Rotation.ThreeQuarter reflectedBlock
+            elif rules.reflectionsAllowed then //handles reflections
+                yield reflect Reflection.X baseBlock
+                yield reflect Reflection.Y baseBlock
+            if rules.rotationsAllowed then //handles rotations
+                yield rotate Rotation.Quarter baseBlock
+                yield rotate Rotation.Half baseBlock
+                yield rotate Rotation.ThreeQuarter baseBlock
+            yield baseBlock
+        ] |> List.map Set.ofList
+    let blockLocBlock = blockLoc |> List.map (fun x -> ((x, 'c') : Tile)) |> zeroBlock |> Set.ofList
+    List.contains blockLocBlock blockConfigs
+
 /// given a target
 let printSolution target blockCount (sol : int list list) =
     let partial = Array2D.create (Array2D.length1 target) (Array2D.length2 target) ' '
@@ -26,14 +48,17 @@ let rec matrixSolutionList tree =
     elif tree.children = [] then []
     else [ for i in tree.children do yield! matrixSolutionList i ]
 
-/// returns a list of coordinates, given solutions and their corresponding blocks
-let blockLoc target (blocks : Tile list list) (solutions : int list list list) =
+/// returns a list of block locations, with order corresponding to given solutions and their corresponding blocks
+let blockLoc target (blocks : Tile list list) rules (solutions : int list list list) =
     [
         for sol in solutions do
             yield
                 [
-                    for row in sol do
-                        yield row |> List.map (unMap blocks.Length (Array2D.length1 target)) |> List.filter Option.isSome |> List.map Option.get
+                    for i in blocks do
+                        for row in sol do
+                            let blockLoc = row |> List.map (unMap blocks.Length (Array2D.length1 target)) |> List.filter Option.isSome |> List.map Option.get
+                            if blockLocIsBlock rules blockLoc i then
+                                yield blockLoc
                 ]
     ]
 

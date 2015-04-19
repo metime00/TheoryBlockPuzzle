@@ -43,7 +43,7 @@ let matrixSolveAndPrint (args : string[]) rules =
         blocks.[i] |> blockToArray |> printArray 0
         printfn ""
 
-    for i in matrixSolutionList finalTree |> blockLoc target blocks do
+    for i in matrixSolutionList finalTree |> blockLoc target blocks rules do
         i |> blockVis target |> printArray 0
         printfn ""
 
