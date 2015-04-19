@@ -43,12 +43,13 @@ let matrixSolveAndPrint (args : string[]) rules =
         blocks.[i] |> blockToArray |> printArray 0
         printfn ""
 
-    for i in matrixSolutionList finalTree |> blockLoc target blocks rules do
-        i |> blockVis target |> printArray 0
+    let solutions = matrixSolutionList rules target blocks finalTree
+    for i in solutions do
+        i |> printArray 0
         printfn ""
 
     timey.Stop ()
-    printfn "\nsolutions: %i, time elapsed: %i" (countMatrixSolutions finalTree) timey.ElapsedMilliseconds
+    printfn "\nsolutions: %i, time elapsed: %i, tree size: %i" (solutions.Length) timey.ElapsedMilliseconds (countNodes finalTree)
     System.Console.ReadKey(true) |> ignore
 
 [<EntryPoint>]
@@ -59,6 +60,10 @@ let main argv =
     //let dedend = {matrix = [[0;1;2;]]; matrixColumns = [0;1;2;3;]; children = []; deadEnd = true}
     //let posible = {matrix = [[0;1;2;]]; matrixColumns = [0;1;2;]; children = []; deadEnd = false}
     //let nodey = {matrix = [[3; 4; 5]; [2;3;4]; [0;1;2]]; matrixColumns = [0; 1; 2; 3; 4; 5;]; children = [dedend; dedend; posible]; deadEnd = false}
+
+    let evenBoard = array2D [| [|'1'; '2'|]; [|'3'; '4'|] |]
+
+    let oddBoard = array2D [| [|'1'; '2'; '3'|]; [|'4'; '5'; '6'|]; [|'7'; '8'; '9'|] |]
 
     matrixSolveAndPrint argv rules
     //bruteForceAndAlsoPrintSolutionStuff argv rules

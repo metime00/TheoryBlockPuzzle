@@ -21,6 +21,14 @@ let zeroBlock (block : Tile list) =
         for ((x, y), c) in block do yield (((x - xMin, y - yMin), c) : Tile)
     ]
 
+/// takes an array and transforms it into a block of all the non blank characters
+let arrayToBlock board =
+    [
+        for i = 0 to Array2D.length1 board - 1 do
+            for j = 0 to Array2D.length2 board - 1 do
+                if board.[i, j] <> ' ' then yield (((i, j), board.[i, j]) : Tile)
+    ]
+
 /// takes a block, zeros it, then converts it into an array where unfilled tiles are the space character
 let blockToArray (block : Tile list) =
     let filledTiles = block |> zeroBlock
