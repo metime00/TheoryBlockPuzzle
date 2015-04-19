@@ -1,5 +1,6 @@
 ﻿open Puzzle
 open MatrixSolver
+open MatrixPrinter
 open BlockUtil
 open InputReader
 
@@ -38,8 +39,12 @@ let matrixSolveAndPrint (args : string[]) rules =
     let finalTree = runX initialNode
     System.Console.Clear ()
 
-    for i in matrixSolutionList finalTree do
-        List.iter (fun x -> printfn "%s" (x.ToString ())) i
+    for i = 0 to blocks.Length - 1 do
+        blocks.[i] |> blockToArray |> printArray 0
+        printfn ""
+
+    for i in matrixSolutionList finalTree |> blockLoc target blocks do
+        i |> blockVis target |> printArray 0
         printfn ""
 
     timey.Stop ()

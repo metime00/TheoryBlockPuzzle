@@ -32,32 +32,6 @@ let inline unMap (blockCount : int) (width : int) (mapped : int) =
         let y = offset / width
         Some((x, y))
 
-/// given a target
-let printSolution target blockCount (sol : int list list) =
-    let partial = Array2D.create (Array2D.length1 target) (Array2D.length2 target) ' '
-    for row in sol do //let be visible only the tiles that are filled in the partial solution
-        for i in row do
-            match unMap blockCount (Array2D.length1 partial) i with
-            | Some((x, y)) ->
-                partial.[x, y] <- target.[x, y]
-            | None ->
-                ()
-    partial |> printArray 0
-
-/// counts the number of solutions
-let rec countMatrixSolutions tree =
-    if tree.matrixColumns = [] then 1
-    elif tree.children = [] then 0
-    else List.sumBy (fun x -> countMatrixSolutions x) tree.children
-
-/// returns a list of all solutions as a selection of rows
-let rec matrixSolutionList tree =
-    if tree.matrixColumns = [] then [tree.partialSolution.Value]
-    elif tree.children = [] then []
-    else [ for i in tree.children do yield! matrixSolutionList i ]
-
-
-
 /// Given a block and a target, gives a list of all the board configurations that can be made by placing the block that won't automatically be wrong, configured as a list of x y coordinates for each placement
 let placeBlocks (block : Tile list) target =
     [

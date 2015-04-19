@@ -51,6 +51,7 @@
     <Compile Include="BlockUtil.fs" />
     <Compile Include="Puzzle.fs" />
     <Compile Include="MatrixSolver.fs" />
+    <Compile Include="MatrixPrinter.fs" />
     <Compile Include="InputReader.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
