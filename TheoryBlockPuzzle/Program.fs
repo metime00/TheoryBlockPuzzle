@@ -38,6 +38,10 @@ let matrixSolveAndPrint (args : string[]) rules =
     let finalTree = runX initialNode
     System.Console.Clear ()
 
+    for i in matrixSolutionList finalTree do
+        List.iter (fun x -> printfn "%s" (x.ToString ())) i
+        printfn ""
+
     timey.Stop ()
     printfn "\nsolutions: %i, time elapsed: %i" (countMatrixSolutions finalTree) timey.ElapsedMilliseconds
     System.Console.ReadKey(true) |> ignore

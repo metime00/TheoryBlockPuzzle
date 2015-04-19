@@ -51,8 +51,10 @@ let rec countMatrixSolutions tree =
     else List.sumBy (fun x -> countMatrixSolutions x) tree.children
 
 /// returns a list of all complete solutions as blocks and their coordinates
-let rec matrixSolutionList tree blocks =
-    0
+let rec matrixSolutionList tree =
+    if tree.matrixColumns = [] then [tree.partialSolution.Value |> Set.ofList |> Set.toList]
+    elif tree.children = [] then []
+    else [ for i in tree.children do yield! matrixSolutionList i ]
 
 /// Given a block and a target, gives a list of all the board configurations that can be made by placing the block that won't automatically be wrong, configured as a list of x y coordinates for each placement
 let placeBlocks (block : Tile list) target =
@@ -90,7 +92,7 @@ let createMatrix (target, (blocks : Tile list list)) rules =
                             yield! placeBlocks (rotate Rotation.Half blocks.[i]) target
                             yield! placeBlocks (rotate Rotation.ThreeQuarter blocks.[i]) target
                         yield! placeBlocks blocks.[i] target
-                    ] |> Set.ofList |> Set.toList
+                    ] |> List.map Set.ofList |> Set.ofList |> Set.toList |> List.map Set.toList
                 //take the coordinates, and turn them into the column locations in the matrix based on the mapping function of block count, board size, and coordinates of the filled tiles
                 for row in validPlacements do
                     yield i :: List.map (mapping blocks.Length (Array2D.length1 target)) row // the list of all the (x, y) coordinates satisfied by the specific block rotation, reflection and placement choice
