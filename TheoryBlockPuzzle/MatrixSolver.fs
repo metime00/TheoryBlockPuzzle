@@ -50,11 +50,13 @@ let rec countMatrixSolutions tree =
     elif tree.children = [] then 0
     else List.sumBy (fun x -> countMatrixSolutions x) tree.children
 
-/// returns a list of all complete solutions as blocks and their coordinates
+/// returns a list of all solutions as a selection of rows
 let rec matrixSolutionList tree =
-    if tree.matrixColumns = [] then [tree.partialSolution.Value |> Set.ofList |> Set.toList]
+    if tree.matrixColumns = [] then [tree.partialSolution.Value]
     elif tree.children = [] then []
     else [ for i in tree.children do yield! matrixSolutionList i ]
+
+
 
 /// Given a block and a target, gives a list of all the board configurations that can be made by placing the block that won't automatically be wrong, configured as a list of x y coordinates for each placement
 let placeBlocks (block : Tile list) target =
