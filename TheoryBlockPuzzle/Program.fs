@@ -26,17 +26,17 @@ let matrixSolveAndPrint (args : string[]) rules =
     let timey = System.Diagnostics.Stopwatch.StartNew ()
 
     /// run and print successive iterations of algorithm x until it completes
-    let rec runX node =
-        let (nextTree, partialSolution) = iterateX node
+    let rec runX node edges =
+        let (nextTree, partialSolution, newEdges) = iterateX node edges
         match partialSolution with
         | Some(sol) ->
 //            System.Console.Clear ()
 //            printSolution target blocks.Length sol
 //            System.Threading.Thread.Sleep 10
-            runX nextTree
+            runX nextTree newEdges
         | None ->
             node
-    let finalTree = runX initialNode
+    let finalTree = runX initialNode [initialNode]
     System.Console.Clear ()
 
     for i = 0 to blocks.Length - 1 do

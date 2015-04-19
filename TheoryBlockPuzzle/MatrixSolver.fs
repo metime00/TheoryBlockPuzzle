@@ -83,34 +83,38 @@ let createMatrix (target, (blocks : Tile list list)) rules =
     (matrix, columns)
 
 /// Performs one iteration of algorithm x, returning the tree of partial and full solutions, and the current partial solution, so that it can be drawn
-let iterateX tree =
-    ///Returns the next node to perform an iteration of algorithm x on, if there are no partial solutions left, 
-    let rec findLeaf node =
-        if Option.isNone node.partialSolution then None        
-        elif node.matrixColumns = [] then None
-        else
-            match node.children with
-            | [] -> Some(node)
-            | children ->
-                match children |> List.tryFind (fun x -> x |> findLeaf |> Option.isSome) with
-                | Some(x) -> findLeaf x
-                | None -> None
+let iterateX tree nextEdges =
+    ///Returns the next node to perform an iteration of algorithm x on, and the list of edge nodes
+    let rec filterNode nodeList =
+        match nodeList with
+        | node :: tail ->
+            if Option.isNone node.partialSolution then filterNode tail
+            elif node.matrixColumns = [] then filterNode tail
+            else
+                match node.children with
+                | [] -> (Some(node), tail)
+                | children -> filterNode tail
+        | [] -> (None, [])
 
-    match findLeaf tree with
+    let (node, edges) = filterNode nextEdges
+    match node with
     | Some(curNode) ->
         /// builds a tree to be returned with one iteration of algorithm x performed on it
         let rec buildTree oldTree node =
             let nextSolIndex = node.partialSolution.Value.Length - oldTree.partialSolution.Value.Length - 1
             if nextSolIndex <> -1 then
                 let nextSol = node.partialSolution.Value.[nextSolIndex]
-                {matrix = oldTree.matrix; matrixColumns = oldTree.matrixColumns; children = oldTree.children |> List.map (fun x -> match x.partialSolution with Some(head :: _) when head = nextSol -> buildTree x node | _ -> x); partialSolution = oldTree.partialSolution }
+                let (changedNode, newEdges) = 
+                    let nodeToChange = oldTree.children |> List.pick (fun x -> match x.partialSolution with Some(head :: _) when head = nextSol -> Some(x) | _ -> None)
+                    buildTree nodeToChange node
+                ({matrix = oldTree.matrix; matrixColumns = oldTree.matrixColumns; children = oldTree.children |> List.map (fun x -> match x.partialSolution with Some(head :: _) when head = nextSol -> changedNode | _ -> x); partialSolution = oldTree.partialSolution }, newEdges)
             else //perform one iteration of algorithm x
                 let matrixColumnValues = //the number of ones in each column of the current submatrix, corresponding to indices in node.matrixColumns
                     node.matrixColumns
                     |> List.map (fun col -> node.matrix |> List.sumBy (fun row -> if List.contains col row then 1 else 0))
                 let minColumnOnes = List.min matrixColumnValues //the minimum number of ones in a column
                 if minColumnOnes = 0 then //if there are any columns with no 1s, then this partial solution won't work
-                    {matrix = node.matrix; matrixColumns = node.matrixColumns; children = []; partialSolution = None}
+                    ({matrix = node.matrix; matrixColumns = node.matrixColumns; children = []; partialSolution = None}, edges)
                 else
                     let column = node.matrixColumns.[matrixColumnValues |> List.findIndex (fun c -> c = minColumnOnes)] //the name of the column that is the first column with the minimum number of 1s
                     let newChildren = //select rows to branch nondeterministically
@@ -120,7 +124,8 @@ let iterateX tree =
                                 let newMatrix = node.matrix |> List.filter (fun x -> not (List.intersects x row)) //remove rows that have 1s in columns that the chosen row has 1s in
                                 yield {matrix = newMatrix; matrixColumns = newMatrixColumns; children = []; partialSolution = Some(row :: Option.get node.partialSolution)} //yield new branches
                         ]
-                    {matrix = node.matrix; matrixColumns = node.matrixColumns; children = newChildren; partialSolution = node.partialSolution}
-        (buildTree tree curNode, curNode.partialSolution)
+                    ({matrix = node.matrix; matrixColumns = node.matrixColumns; children = newChildren; partialSolution = node.partialSolution}, newChildren @ edges)
+        let (newTree, newEdges) = buildTree tree curNode
+        (newTree, curNode.partialSolution, newEdges)
     | None ->
-        (tree, None)
+        (tree, None, [])
