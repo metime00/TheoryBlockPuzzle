@@ -5,7 +5,8 @@ type coord = (int * int)
 
 type colLoc = int
 
-type ChoiceMatrix = int list list
+/// a list of row or column name by rows or columns that it has a 1 in
+type ChoiceMatrix = (int * int list) list
 
 module List =
     /// Tests if an element is contained in a list
@@ -16,7 +17,7 @@ module List =
         List.exists (fun x  -> contains x list2) list1
 
 /// matrix columns are the names of columns that exist in the current node. For example, there could be three columns in the submatrix, but the names of those columns could be 1, 22, and 24. They still have to be ordered
-type Node = { matrix : ChoiceMatrix; matrixColumns : int list; children : Node list; partialSolution : int list list option } //partialSolution is a list of rows chosen to be in the partial solution
+type Node = { matrixRows : ChoiceMatrix; matrixColumns : ChoiceMatrix; children : Node list; partialSolution : int list list option } //partialSolution is a list of rows chosen to be in the partial solution
 
 /// a mapping of x y coordinates to a natural number based on an offset (blockCount) and the size of the board
 let inline mapping blockCount (width : int) ((x : int), (y : int)) =
@@ -48,8 +49,8 @@ let placeBlocks (block : Tile list) target =
 
 /// Creates a choice/constraint matrix (in the form of a list) from a puzzle, reducing the number of choices by if the characters in the possible choices match the target
 let createMatrix (target, (blocks : Tile list list)) rules =
-    let matrix =
-        ([
+    let rows =
+        [
             for i = 0 to blocks.Length - 1 do
                 // all the valid placements based on if reflections and rotations are allowed, as a list of placement coordinates
                 let validPlacements = 
@@ -72,15 +73,19 @@ let createMatrix (target, (blocks : Tile list list)) rules =
                 //take the coordinates, and turn them into the column locations in the matrix based on the mapping function of block count, board size, and coordinates of the filled tiles
                 for row in validPlacements do
                     yield i :: List.map (mapping blocks.Length (Array2D.length1 target)) row // the list of all the (x, y) coordinates satisfied by the specific block rotation, reflection and placement choice
-        ] : ChoiceMatrix)
+        ]
     let notBlank colMap = //tests if a column maps to an x y coordinate of the target board that doesn't need to be filled with anything
         match unMap blocks.Length (Array2D.length1 target) colMap with
         | Some((x, y)) ->
             target.[x, y] <> ' '
         | None ->
             true
-    let columns = [0 .. List.maxBy (fun row -> List.max row) matrix |> List.max] |> List.filter (notBlank)
-    (matrix, columns)
+    let columnNames = [0 .. List.maxBy (fun row -> List.max row) rows |> List.max] |> List.filter (notBlank)
+    let rowNames = [0 .. rows.Length - 1]
+    let columns = columnNames |> List.map (fun col -> rowNames |> List.filter (fun rowName -> List.contains col rows.[rowName]))
+    let (rowMatrix : ChoiceMatrix) = List.map2 (fun name row -> (name, row)) rowNames rows
+    let (colMatrix : ChoiceMatrix) = List.map2 (fun name col -> (name, col)) columnNames columns
+    (rowMatrix, colMatrix)
 
 /// Performs one iteration of algorithm x, returning the tree of partial and full solutions, and the current partial solution, so that it can be drawn
 let iterateX tree nextEdges =
@@ -107,24 +112,24 @@ let iterateX tree nextEdges =
                 let (changedNode, newEdges) = 
                     let nodeToChange = oldTree.children |> List.pick (fun x -> match x.partialSolution with Some(head :: _) when head = nextSol -> Some(x) | _ -> None)
                     buildTree nodeToChange node
-                ({matrix = oldTree.matrix; matrixColumns = oldTree.matrixColumns; children = oldTree.children |> List.map (fun x -> match x.partialSolution with Some(head :: _) when head = nextSol -> changedNode | _ -> x); partialSolution = oldTree.partialSolution }, newEdges)
+                ({matrixRows = oldTree.matrixRows; matrixColumns = oldTree.matrixColumns; children = oldTree.children |> List.map (fun x -> match x.partialSolution with Some(head :: _) when head = nextSol -> changedNode | _ -> x); partialSolution = oldTree.partialSolution }, newEdges)
             else //perform one iteration of algorithm x
                 let matrixColumnValues = //the number of ones in each column of the current submatrix, corresponding to indices in node.matrixColumns
                     node.matrixColumns
-                    |> List.map (fun col -> node.matrix |> List.sumBy (fun row -> if List.contains col row then 1 else 0))
+                    |> List.map (fun col -> node.matrixRows |> List.sumBy (fun row -> if List.contains col row then 1 else 0))
                 let minColumnOnes = List.min matrixColumnValues //the minimum number of ones in a column
                 if minColumnOnes = 0 then //if there are any columns with no 1s, then this partial solution won't work
-                    ({matrix = node.matrix; matrixColumns = node.matrixColumns; children = []; partialSolution = None}, edges)
+                    ({matrixRows = node.matrixRows; matrixColumns = node.matrixColumns; children = []; partialSolution = None}, edges)
                 else
                     let column = node.matrixColumns.[matrixColumnValues |> List.findIndex (fun c -> c = minColumnOnes)] //the name of the column that is the first column with the minimum number of 1s
                     let newChildren = //select rows to branch nondeterministically
                         [
-                            for row in List.filter (List.contains column) node.matrix do
+                            for row in List.filter (List.contains column) node.matrixRows do
                                 let newMatrixColumns = node.matrixColumns |> List.filter (fun x -> not (List.contains x row)) //remove columns that the row has a 1 in
-                                let newMatrix = node.matrix |> List.filter (fun x -> not (List.intersects x row)) //remove rows that have 1s in columns that the chosen row has 1s in
-                                yield {matrix = newMatrix; matrixColumns = newMatrixColumns; children = []; partialSolution = Some(row :: Option.get node.partialSolution)} //yield new branches
+                                let newMatrix = node.matrixRows |> List.filter (fun (_, x) -> not (List.intersects x row)) //remove rows that have 1s in columns that the chosen row has 1s in
+                                yield {matrixRows = newMatrix; matrixColumns = newMatrixColumns; children = []; partialSolution = Some(row :: Option.get node.partialSolution)} //yield new branches
                         ]
-                    ({matrix = node.matrix; matrixColumns = node.matrixColumns; children = newChildren; partialSolution = node.partialSolution}, newChildren @ edges)
+                    ({matrixRows = node.matrixRows; matrixColumns = node.matrixColumns; children = newChildren; partialSolution = node.partialSolution}, newChildren @ edges)
         let (newTree, newEdges) = buildTree tree curNode
         (newTree, curNode.partialSolution, newEdges)
     | None ->
