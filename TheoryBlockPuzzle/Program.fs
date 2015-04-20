@@ -49,7 +49,7 @@ let matrixSolveAndPrint (args : string[]) rules =
         printfn ""
 
     timey.Stop ()
-    printfn "\nsolutions: %i, time elapsed: %i, tree size: %i" (solutions.Length) timey.ElapsedMilliseconds (countNodes finalTree)
+    printfn "\nisomorphic solutions: %i, unique solutions: %i, time elapsed: %i, tree size: %i" (countIsoSolutions finalTree) (solutions.Length) timey.ElapsedMilliseconds (countNodes finalTree)
     System.Console.ReadKey(true) |> ignore
 
 [<EntryPoint>]

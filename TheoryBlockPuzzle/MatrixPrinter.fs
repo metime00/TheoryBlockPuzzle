@@ -41,6 +41,12 @@ let rec countNodes tree =
     if tree.children = [] then 1
     else List.sumBy (fun x -> countNodes x) tree.children
 
+/// counts the number of solutions, including isomorphic ones
+let rec countIsoSolutions tree =
+    if tree.matrixColumns = [] then 1
+    elif tree.children = [] then 0
+    else List.sumBy (fun x -> countIsoSolutions x) tree.children
+
 /// returns a list of block locations, with order corresponding to given solutions and their corresponding blocks
 let blockLoc target (blocks : Tile list list) rules (solution : int list list) =
     [
