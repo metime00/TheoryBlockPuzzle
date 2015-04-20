@@ -114,17 +114,25 @@ let iterateX tree nextEdges =
                     buildTree nodeToChange node
                 ({matrixRows = oldTree.matrixRows; matrixColumns = oldTree.matrixColumns; children = oldTree.children |> List.map (fun x -> match x.partialSolution with Some(head :: _) when head = nextSol -> changedNode | _ -> x); partialSolution = oldTree.partialSolution }, newEdges)
             else //perform one iteration of algorithm x
+                let matrixColumnOnes = node.matrixColumns |> List.map (fun (_, column) -> column.Length)
                 let minColumnOnes = //the smallest number of ones in any column
-                    node.matrixColumns |> List.map (fun (_, column) -> column.Length) |> List.min
+                    matrixColumnOnes |> List.min
                 if minColumnOnes = 0 then //if there are any columns with no 1s, then this partial solution won't work
                     ({matrixRows = node.matrixRows; matrixColumns = node.matrixColumns; children = []; partialSolution = None}, edges)
                 else
                     let columnName = node.matrixColumns |> List.pick (fun (name, rows) -> if rows.Length = minColumnOnes then Some(name) else None) //the name of the column that is the first column with the minimum number of 1s
                     let newChildren = //select rows to branch nondeterministically
                         [
-                            for (rowName, row) in List.filter (fun (_, row) -> List.contains columnName row) node.matrixRows do
-                                let newMatrixColumns = node.matrixColumns |> List.filter (fun (_, column) -> not (List.contains rowName column)) //remove columns that the row has a 1 in
-                                let newMatrixRows = node.matrixRows |> List.filter (fun (_, x) -> not (List.intersects x row)) //remove rows that have 1s in columns that the chosen row has 1s in
+                            let selectedRows = List.filter (fun (_, row) -> List.contains columnName row) node.matrixRows
+                            for (rowName, row) in selectedRows do
+                                let columnsToDelete = node.matrixColumns |> List.filter (fun (_, column) -> List.contains rowName column) //remove columns that the row has a 1 in
+                                let rowsToDelete = node.matrixRows |> List.filter (fun (_, x) -> List.intersects x row) //remove rows that have 1s in columns that the chosen row has 1s in
+
+                                let newMatrixColumns =
+                                    node.matrixColumns
+                                    |> List.filter (fun x -> not (List.contains x columnsToDelete))
+                                    |> List.map (fun (columnName, column) -> (columnName, column |> List.filter (fun x -> not (List.exists (fun (rowToDelete, _) -> rowToDelete = x) rowsToDelete)))) //prune rows that don't exist anymore from the columns
+                                let newMatrixRows = node.matrixRows |> List.filter (fun x -> not (List.contains x rowsToDelete))
                                 yield {matrixRows = newMatrixRows; matrixColumns = newMatrixColumns; children = []; partialSolution = Some(row :: Option.get node.partialSolution)} //yield new branches
                         ]
                     ({matrixRows = node.matrixRows; matrixColumns = node.matrixColumns; children = newChildren; partialSolution = node.partialSolution}, newChildren @ edges)
