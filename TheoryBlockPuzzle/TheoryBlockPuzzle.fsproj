@@ -45,7 +45,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockUtil.fs" />
@@ -53,6 +55,7 @@
     <Compile Include="Puzzle.fs" />
     <Compile Include="MatrixSolver.fs" />
     <Compile Include="MatrixPrinter.fs" />
+    <Compile Include="Window.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>

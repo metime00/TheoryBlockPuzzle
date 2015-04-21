@@ -36,6 +36,29 @@ let printSolution target blockCount (sol : int list list) =
                 ()
     partial |> printArray 0
 
+let toFileMatrixAsListOfLists (matrix : ChoiceMatrix) =
+    let outFile = new System.IO.StreamWriter("problemset.txt")
+
+    let rowString (row : int list) =
+        let mutable out = "["
+        for i = 0 to row.Length - 1 do
+            if i < row.Length - 1 then
+                out <- out + row.[i].ToString () + ", "
+            else
+                out <- out + row.[i].ToString ()
+        out <- out + "]"
+        out
+    let mutable stringy = "["
+    for i = 0 to matrix.Length - 1 do
+        if i < matrix.Length - 1 then
+            stringy <- stringy + rowString matrix.[i] + ", "
+        else
+            stringy <- stringy + rowString matrix.[i]
+    stringy <- stringy + "]"
+
+    outFile.Write(stringy)
+    outFile.Close ()
+
 /// counts the number of nodes
 let rec countNodes tree =
     if tree.children = [] then 1

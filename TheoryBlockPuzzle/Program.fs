@@ -20,7 +20,11 @@ let matrixSolveAndPrint (args : string[]) rules =
     let (target, blocks) = arrayToPuzzle writeums
     //(snd puzzle).[2] |> blockToArray |> printArray 0
     let (matrix, columns) = createMatrix (target, blocks) rules
+    
+    toFileMatrixAsListOfLists matrix
+    
     printfn "rows: %i" (List.length matrix)
+
     let initialNode = {matrix = matrix; matrixColumns = columns; children = []; partialSolution = Some([])}
 
     let timey = System.Diagnostics.Stopwatch.StartNew ()
