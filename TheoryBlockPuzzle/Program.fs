@@ -85,6 +85,35 @@ let recursiveMatrixSolveAndPrint (args : string[]) rules =
 
     System.Console.ReadKey(true) |> ignore
 
+///reads puzzlefiles 0 - 18 in its current directory, then prints metrix and numbers of solutions to a file
+let solveAll rules =
+    let outFile = new System.IO.StreamWriter("solutionsAndMetrix.txt")
+    for i = 0 to 18 do
+        let fileName = System.String.Format("puzzlefile{0}.txt", i)
+        let writeums = fileToArray fileName
+        let (target, blocks) = arrayToPuzzle writeums
+        let (matrix, columns) = createMatrix (target, blocks) rules
+
+        printfn "rows: %i" (List.length matrix)
+
+        let timey = System.Diagnostics.Stopwatch.StartNew ()
+
+        let allSolutions = recursiveSolve matrix columns []
+
+        timey.Stop ()
+
+        for i = 0 to blocks.Length - 1 do
+            blocks.[i] |> blockToArray |> printArray 0
+            printfn ""
+
+        let solutions = matrixSolutionList rules target blocks allSolutions
+        for i in solutions do
+            i |> printArray 0
+            printfn ""
+
+        outFile.WriteLine (System.String.Format("\nisomorphic solutions: {0} solutions: {1}, time elapsed: {2}", (allSolutions.Length), (solutions.Length), timey.ElapsedMilliseconds))
+    outFile.Close ()
+        
 
 [<EntryPoint>]
 let main argv = 
@@ -99,8 +128,9 @@ let main argv =
 
     let oddBoard = array2D [| [|'1'; '2'; '3'|]; [|'4'; '5'; '6'|]; [|'7'; '8'; '9'|] |]
 
-    matrixSolveAndPrint argv rules
+    //matrixSolveAndPrint argv rules
     //bruteForceAndAlsoPrintSolutionStuff argv rules
     //recursiveMatrixSolveAndPrint argv rules
+    solveAll rules
 
     0 // return an integer exit code
