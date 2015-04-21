@@ -83,6 +83,12 @@ let blockVis target (blockLoc : (int * int) list list) =
             visArray.[i, j] <- char (index + 48)
     visArray
 
+/// counts the number of solutions, including isomorphic ones
+let rec countIsoSolutions tree =
+    if tree.matrixColumns = [] then 1
+    elif tree.children = [] then 0
+    else List.sumBy (fun x -> countIsoSolutions x) tree.children
+
 /// returns a list of all solutions as a selection of rows, removing isomorphic ones
 let matrixSolutionList rules target blocks tree =
     let rec allSolutions tree =
