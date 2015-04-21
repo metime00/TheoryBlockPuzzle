@@ -4,6 +4,14 @@ type GameRules = { rotationsAllowed : bool; reflectionsAllowed : bool }
 
 type Tile = (int * int) * char
 
+module List =
+    /// Tests if an element is contained in a list
+    let contains element list =
+        List.exists (fun i -> i = element) list
+    /// Tests if any elements are shared by two lists
+    let intersects list1 list2 =
+        List.exists (fun x  -> contains x list2) list1
+
 type Rotation =
     | Quarter
     | Half
@@ -59,6 +67,42 @@ let reflect axis (block : Tile list) =
         | Y ->
             List.map (fun ((x, y), c) -> (((-x, y), c) : Tile)) block
     zeroBlock reflectedBlock
+
+/// tests if two blocks are the same, given allowed rotations or reflections
+let equal (block1 : Tile list) (block2 : Tile list) rules =
+    let block1Permutations =
+        [
+            if rules.rotationsAllowed && rules.reflectionsAllowed then //handles reflections and reflections of rotations
+                let reflectedBlock = reflect Reflection.X block1
+                yield reflectedBlock
+                yield rotate Rotation.Quarter reflectedBlock
+                yield rotate Rotation.Half reflectedBlock
+                yield rotate Rotation.ThreeQuarter reflectedBlock
+            elif rules.reflectionsAllowed then //handles reflections
+                yield reflect Reflection.X block1
+                yield reflect Reflection.Y block1
+            if rules.rotationsAllowed then //handles rotations
+                yield rotate Rotation.Quarter block1
+                yield rotate Rotation.Half block1
+                yield rotate Rotation.ThreeQuarter block1
+            yield block1
+        ]
+    List.contains block2 block1Permutations
+
+///given a list of blocks, returns the ones that have duplicates, and how many duplicates there are
+let identicalBlocks (blocks : Tile list list) rules =
+    let rec pickBlocks (blocks : Tile list list) identicalBlocks =
+        match blocks with
+        | head :: tail ->
+            if tail |> List.exists (fun x -> equal head x rules) then
+                pickBlocks tail (Set.add head identicalBlocks)
+            else
+                pickBlocks tail identicalBlocks
+        | [] ->
+            identicalBlocks
+    let duplicatedBlocks = pickBlocks blocks Set.empty |> Set.toList
+    duplicatedBlocks |> List.map (fun x -> (x, blocks |> List.filter (fun y -> x = y) |> List.length)
+        
 
 let printArray tabs input =
     for j = 0 to Array2D.length2 input - 1 do

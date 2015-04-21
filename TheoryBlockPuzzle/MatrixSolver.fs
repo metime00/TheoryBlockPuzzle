@@ -7,14 +7,6 @@ type colLoc = int
 
 type ChoiceMatrix = int list list
 
-module List =
-    /// Tests if an element is contained in a list
-    let contains element list =
-        List.exists (fun i -> i = element) list
-    /// Tests if any elements are shared by two lists
-    let intersects list1 list2 =
-        List.exists (fun x  -> contains x list2) list1
-
 /// matrix columns are the names of columns that exist in the current node. For example, there could be three columns in the submatrix, but the names of those columns could be 1, 22, and 24. They still have to be ordered
 type Node = { matrix : ChoiceMatrix; matrixColumns : int list; children : Node list; partialSolution : int list list option } //partialSolution is a list of rows chosen to be in the partial solution
 

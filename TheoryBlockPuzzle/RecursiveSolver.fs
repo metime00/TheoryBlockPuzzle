@@ -1,5 +1,6 @@
 ﻿module RecursiveSolver
 open MatrixSolver
+open BlockUtil
 
 let rec recursiveSolve (input : ChoiceMatrix) (columnNames) (partialSolution : int list list) =
     if input = [] && columnNames = [] then

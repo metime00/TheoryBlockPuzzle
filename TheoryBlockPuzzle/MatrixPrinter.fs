@@ -97,10 +97,11 @@ let rec solutionsFromTree tree =
 
 /// returns a list of all solutions as a selection of rows, removing isomorphic ones
 let matrixSolutionList rules target blocks solutions =
+    
     let unfiltered = solutions |> List.map (blockLoc target blocks rules) |> List.map (blockVis target)
     /// a recursive function that takes the head, creates all rotations and reflections, filters out any of them from the list, then calls itself again until nothing happens. Then only non-isomorphic solutions remain
     let rec removeIsomorphs (solutionList : char[,] list) solutionsChecked =
-        if solutionsChecked <> solutionList.Length then
+        if solutionsChecked < solutionList.Length then
             let curSol = solutionList.[solutionsChecked]
             let isomorphs =
                 [
@@ -122,4 +123,4 @@ let matrixSolutionList rules target blocks solutions =
             removeIsomorphs newSolutions (solutionsChecked + 1)
         else
             solutionList
-    removeIsomorphs unfiltered 0
+    removeIsomorphs unfiltered 0 |> Set.ofList |> Set.toList

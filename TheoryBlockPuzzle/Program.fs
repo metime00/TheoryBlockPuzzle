@@ -64,6 +64,8 @@ let recursiveMatrixSolveAndPrint (args : string[]) rules =
     //(snd puzzle).[2] |> blockToArray |> printArray 0
     let (matrix, columns) = createMatrix (target, blocks) rules
 
+    toFileMatrixAsListOfLists matrix
+
     printfn "rows: %i" (List.length matrix)
 
     let timey = System.Diagnostics.Stopwatch.StartNew ()
@@ -130,7 +132,7 @@ let main argv =
 
     //matrixSolveAndPrint argv rules
     //bruteForceAndAlsoPrintSolutionStuff argv rules
-    //recursiveMatrixSolveAndPrint argv rules
-    solveAll rules
+    recursiveMatrixSolveAndPrint argv rules
+    //solveAll rules
 
     0 // return an integer exit code
