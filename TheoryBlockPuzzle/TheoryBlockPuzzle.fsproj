@@ -54,6 +54,7 @@
     <Compile Include="InputReader.fs" />
     <Compile Include="Puzzle.fs" />
     <Compile Include="MatrixSolver.fs" />
+    <Compile Include="RecursiveSolver.fs" />
     <Compile Include="MatrixPrinter.fs" />
     <Compile Include="Window.fs" />
     <Compile Include="Program.fs" />

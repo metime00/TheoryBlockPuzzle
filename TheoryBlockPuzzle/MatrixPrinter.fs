@@ -89,13 +89,15 @@ let rec countIsoSolutions tree =
     elif tree.children = [] then 0
     else List.sumBy (fun x -> countIsoSolutions x) tree.children
 
+/// gets a list of solutions from a tree
+let rec solutionsFromTree tree =
+    if tree.matrixColumns = [] then [tree.partialSolution.Value]
+    elif tree.children = [] then []
+    else [ for i in tree.children do yield! solutionsFromTree i ]
+
 /// returns a list of all solutions as a selection of rows, removing isomorphic ones
-let matrixSolutionList rules target blocks tree =
-    let rec allSolutions tree =
-        if tree.matrixColumns = [] then [tree.partialSolution.Value]
-        elif tree.children = [] then []
-        else [ for i in tree.children do yield! allSolutions i ]
-    let unfiltered = allSolutions tree |> List.map (blockLoc target blocks rules) |> List.map (blockVis target)
+let matrixSolutionList rules target blocks solutions =
+    let unfiltered = solutions |> List.map (blockLoc target blocks rules) |> List.map (blockVis target)
     /// a recursive function that takes the head, creates all rotations and reflections, filters out any of them from the list, then calls itself again until nothing happens. Then only non-isomorphic solutions remain
     let rec removeIsomorphs (solutionList : char[,] list) solutionsChecked =
         if solutionsChecked <> solutionList.Length then

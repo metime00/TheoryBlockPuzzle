@@ -1,5 +1,6 @@
 ﻿open Puzzle
 open MatrixSolver
+open RecursiveSolver
 open MatrixPrinter
 open BlockUtil
 open InputReader
@@ -47,7 +48,7 @@ let matrixSolveAndPrint (args : string[]) rules =
         blocks.[i] |> blockToArray |> printArray 0
         printfn ""
 
-    let solutions = matrixSolutionList rules target blocks finalTree
+    let solutions = matrixSolutionList rules target blocks (solutionsFromTree finalTree)
     for i in solutions do
         i |> printArray 0
         printfn ""
@@ -55,6 +56,35 @@ let matrixSolveAndPrint (args : string[]) rules =
     timey.Stop ()
     printfn "\nisomorphic solutions: %i solutions: %i, time elapsed: %i, tree size: %i" (countIsoSolutions finalTree) (solutions.Length) timey.ElapsedMilliseconds (countNodes finalTree)
     System.Console.ReadKey(true) |> ignore
+
+
+let recursiveMatrixSolveAndPrint (args : string[]) rules =
+    let writeums = fileToArray args.[0]
+    let (target, blocks) = arrayToPuzzle writeums
+    //(snd puzzle).[2] |> blockToArray |> printArray 0
+    let (matrix, columns) = createMatrix (target, blocks) rules
+
+    printfn "rows: %i" (List.length matrix)
+
+    let timey = System.Diagnostics.Stopwatch.StartNew ()
+
+    let allSolutions = recursiveSolve matrix columns []
+
+    timey.Stop ()
+
+    for i = 0 to blocks.Length - 1 do
+        blocks.[i] |> blockToArray |> printArray 0
+        printfn ""
+
+    let solutions = matrixSolutionList rules target blocks allSolutions
+    for i in solutions do
+        i |> printArray 0
+        printfn ""
+
+    printfn "\nisomorphic solutions: %i solutions: %i, time elapsed: %i" (allSolutions.Length) (solutions.Length) timey.ElapsedMilliseconds
+
+    System.Console.ReadKey(true) |> ignore
+
 
 [<EntryPoint>]
 let main argv = 
@@ -71,5 +101,6 @@ let main argv =
 
     matrixSolveAndPrint argv rules
     //bruteForceAndAlsoPrintSolutionStuff argv rules
+    //recursiveMatrixSolveAndPrint argv rules
 
     0 // return an integer exit code
