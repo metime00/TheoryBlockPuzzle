@@ -83,7 +83,11 @@ let recursiveMatrixSolveAndPrint (args : string[]) rules =
         i |> printArray 0
         printfn ""
 
-    printfn "\nisomorphic solutions: %i solutions: %i, time elapsed: %i" (allSolutions.Length) (solutions.Length) timey.ElapsedMilliseconds
+    let numSolutions =
+        let divisor = identicalBlocks blocks rules |> List.map (fun (_, x) -> factorial x) |> List.reduce (fun x y -> x * y)
+        solutions.Length / divisor
+
+    printfn "\nisomorphic solutions: %i solutions: %i, time elapsed: %i" (allSolutions.Length) (numSolutions) timey.ElapsedMilliseconds
 
     System.Console.ReadKey(true) |> ignore
 

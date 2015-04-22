@@ -100,9 +100,9 @@ let matrixSolutionList rules target blocks solutions =
     
     let unfiltered = solutions |> List.map (blockLoc target blocks rules) |> List.map (blockVis target)
     /// a recursive function that takes the head, creates all rotations and reflections, filters out any of them from the list, then calls itself again until nothing happens. Then only non-isomorphic solutions remain
-    let rec removeIsomorphs (solutionList : char[,] list) solutionsChecked =
-        if solutionsChecked < solutionList.Length then
-            let curSol = solutionList.[solutionsChecked]
+    let rec removeIsomorphs (solutionList : char[,] list) solutions =
+        match solutionList with
+        | curSol :: tail ->
             let isomorphs =
                 [
                     let reflectedX = curSol |> arrayToBlock |> reflect Reflection.X |> blockToArray
@@ -119,8 +119,8 @@ let matrixSolutionList rules target blocks solutions =
                     yield curSol |> arrayToBlock |> rotate Rotation.Quarter |> blockToArray
                     yield curSol |> arrayToBlock |> rotate Rotation.ThreeQuarter |> blockToArray
                 ]
-            let newSolutions = solutionList |> List.filter (fun x -> not (List.contains x isomorphs))
-            removeIsomorphs newSolutions (solutionsChecked + 1)
-        else
-            solutionList
-    removeIsomorphs unfiltered 0 |> Set.ofList |> Set.toList
+            let newSolutions = tail |> List.filter (fun x -> not (List.contains x isomorphs))
+            removeIsomorphs newSolutions (curSol :: solutions)
+        | [] ->
+            solutions
+    removeIsomorphs unfiltered []

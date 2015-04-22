@@ -21,6 +21,11 @@ type Reflection =
     | X
     | Y
 
+let rec factorial x =
+    match x with
+    | 1 -> 1
+    | _ -> x * factorial (x - 1)
+
 /// makes all tiles in a block relativized with the upper left being the origin
 let zeroBlock (block : Tile list) =
     let xMin = List.minBy (fun ((x, y), _) -> x) block |> fst |> fst
@@ -91,8 +96,8 @@ let equal (block1 : Tile list) (block2 : Tile list) rules =
 
 ///given a list of blocks, returns the ones that have duplicates, and how many duplicates there are
 let identicalBlocks (blocks : Tile list list) rules =
-    let rec pickBlocks (blocks : Tile list list) identicalBlocks =
-        match blocks with
+    let rec pickBlocks (recBlocks : Tile list list) identicalBlocks =
+        match recBlocks with
         | head :: tail ->
             if tail |> List.exists (fun x -> equal head x rules) then
                 pickBlocks tail (Set.add head identicalBlocks)
@@ -100,8 +105,8 @@ let identicalBlocks (blocks : Tile list list) rules =
                 pickBlocks tail identicalBlocks
         | [] ->
             identicalBlocks
-    let duplicatedBlocks = pickBlocks blocks Set.empty |> Set.toList
-    duplicatedBlocks |> List.map (fun x -> (x, blocks |> List.filter (fun y -> x = y) |> List.length)
+    let duplicatedBlocks = (pickBlocks blocks Set.empty) |> Set.toList
+    duplicatedBlocks |> List.map (fun x -> (x, blocks |> List.filter (fun y -> equal x y rules) |> List.length))
         
 
 let printArray tabs input =
