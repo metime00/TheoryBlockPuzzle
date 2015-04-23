@@ -3,6 +3,7 @@ open MatrixSolver
 open RecursiveSolver
 open MatrixPrinter
 open BlockUtil
+open Window
 open InputReader
 
 let bruteForceAndAlsoPrintSolutionStuff (args : string[]) rules =
@@ -108,18 +109,23 @@ let solveAll rules =
 
         timey.Stop ()
 
-        for i = 0 to blocks.Length - 1 do
-            blocks.[i] |> blockToArray |> printArray 0
-            printfn ""
-
         let solutions = matrixSolutionList rules target blocks allSolutions
-        for i in solutions do
-            i |> printArray 0
-            printfn ""
 
-        outFile.WriteLine (System.String.Format("\nisomorphic solutions: {0} solutions: {1}, time elapsed: {2}", (allSolutions.Length), (solutions.Length), timey.ElapsedMilliseconds))
+        let numSolutions =
+            let divisor = identicalBlocks blocks rules |> List.map (fun (_, x) -> factorial x) |> List.reduce (fun x y -> x * y)
+            solutions.Length / divisor
+
+        outFile.WriteLine (System.String.Format("\n{3}. isomorphic solutions: {0} solutions: {1}, time elapsed: {2}", (allSolutions.Length), (numSolutions), timey.ElapsedMilliseconds, i))
     outFile.Close ()
-        
+ 
+ 
+let runWindow () =
+    let window = new Window ()
+    window.Show ()
+    while window.Visible do
+        window.Iterate ()
+        window.Refresh ()
+        System.Windows.Forms.Application.DoEvents ()
 
 [<EntryPoint>]
 let main argv = 
@@ -130,13 +136,10 @@ let main argv =
     //let posible = {matrix = [[0;1;2;]]; matrixColumns = [0;1;2;]; children = []; deadEnd = false}
     //let nodey = {matrix = [[3; 4; 5]; [2;3;4]; [0;1;2]]; matrixColumns = [0; 1; 2; 3; 4; 5;]; children = [dedend; dedend; posible]; deadEnd = false}
 
-    let evenBoard = array2D [| [|'1'; '2'|]; [|'3'; '4'|] |]
-
-    let oddBoard = array2D [| [|'1'; '2'; '3'|]; [|'4'; '5'; '6'|]; [|'7'; '8'; '9'|] |]
-
     //matrixSolveAndPrint argv rules
     //bruteForceAndAlsoPrintSolutionStuff argv rules
-    recursiveMatrixSolveAndPrint argv rules
+    //recursiveMatrixSolveAndPrint argv rules
     //solveAll rules
+    runWindow ()
 
     0 // return an integer exit code
