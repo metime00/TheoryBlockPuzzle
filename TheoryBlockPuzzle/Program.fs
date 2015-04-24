@@ -1,5 +1,6 @@
 ﻿open Puzzle
 open MatrixSolver
+open SudokuConverter
 open RecursiveSolver
 open MatrixPrinter
 open BlockUtil
@@ -117,7 +118,38 @@ let solveAll rules =
 
         outFile.WriteLine (System.String.Format("\n{3}. isomorphic solutions: {0} solutions: {1}, time elapsed: {2}", (allSolutions.Length), (numSolutions), timey.ElapsedMilliseconds, i))
     outFile.Close ()
- 
+
+///creates a exact cover matrix from a given sudoku and solves it
+let solveSudoku () =
+    let n = 3
+    let initial = 
+        [|
+            [|8;0;0;4;0;6;0;0;7;|];
+            [|0;0;0;0;0;0;4;0;0;|];
+            [|0;1;0;0;0;0;6;5;0;|];
+
+            [|5;0;9;0;3;0;7;8;0;|];
+            [|0;0;0;0;7;0;0;0;0;|];
+            [|0;4;8;0;2;0;1;0;3;|];
+
+            [|0;5;2;0;0;0;0;9;0;|];
+            [|0;0;1;0;0;0;0;0;0;|];
+            [|3;0;0;9;0;2;0;0;5;|];
+        |] |> array2D
+
+    let nsmall = 2
+    let smallInitial = 
+        [|
+            [|0;1; 2;0;|]
+            [|0;0; 0;0;|]
+
+            [|0;4; 3;0;|]
+            [|3;0; 0;0;|]
+        |] |> array2D
+
+    let (matrix, columns) = sudokuToMatrix nsmall smallInitial
+    System.Console.ReadKey(true) |> ignore
+
  
 let runWindow () =
     let window = new Window ()
@@ -140,6 +172,7 @@ let main argv =
     //bruteForceAndAlsoPrintSolutionStuff argv rules
     //recursiveMatrixSolveAndPrint argv rules
     //solveAll rules
-    runWindow ()
+    //runWindow ()
+    solveSudoku ()
 
     0 // return an integer exit code
