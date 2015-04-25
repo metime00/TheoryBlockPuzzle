@@ -34,6 +34,20 @@ let zeroBlock (block : Tile list) =
         for ((x, y), c) in block do yield (((x - xMin, y - yMin), c) : Tile)
     ]
 
+/// gets a row from a 2d array
+let Array2DRow row input =
+    [
+        for i = 0 to Array2D.length1 input - 1 do
+            yield input.[i,row]
+    ]
+
+/// gets a column from a 2d array
+let Array2DColumn col input =
+    [
+        for i = 0 to Array2D.length2 input - 1 do
+            yield input.[col,i]
+    ]
+
 /// takes an array and transforms it into a block of all the non blank characters
 let arrayToBlock board =
     [
