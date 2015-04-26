@@ -1,13 +1,11 @@
-OOO
 
-O
-O
-O
-
-OOOO
-
-OO
-
-OOOO
-OOOO
-OOOO
+       O  O        O
+   OO  O  O   OO   O  OO            OOO
+  OO   O  O   OO  OO   O            OOO
+   O   O  OO  O   O    OO           OOO
+       O                    O    OOOOOOOOO
+  OOO        O    O     O   O    OOOOOOOOO
+   O   O O   O    OO   OOO  OO   OOOOOOOOO
+   O   OOO   OOO   OO   O   O       OOO
+                                    OOO
+                                    OOO

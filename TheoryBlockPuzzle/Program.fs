@@ -86,7 +86,10 @@ let recursiveMatrixSolveAndPrint (args : string[]) rules =
         printfn ""
 
     let numSolutions =
-        let divisor = identicalBlocks blocks rules |> List.map (fun (_, x) -> factorial x) |> List.reduce (fun x y -> x * y)
+        let divisor = 
+            match identicalBlocks blocks rules with
+            | [] -> 1
+            | x -> x |> List.map (fun (_, x) -> factorial x) |> List.reduce (fun x y -> x * y)
         solutions.Length / divisor
 
     printfn "\nisomorphic solutions: %i solutions: %i, time elapsed: %i" (allSolutions.Length) (numSolutions) timey.ElapsedMilliseconds
@@ -187,9 +190,9 @@ let main argv =
 
     //matrixSolveAndPrint argv rules
     //bruteForceAndAlsoPrintSolutionStuff argv rules
-    //recursiveMatrixSolveAndPrint argv rules
+    recursiveMatrixSolveAndPrint argv rules
     //solveAll rules
     //runWindow ()
-    solveSudoku ()
+    //solveSudoku ()
 
     0 // return an integer exit code
