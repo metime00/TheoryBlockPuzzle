@@ -41,6 +41,19 @@ type Window () as this =
     let mutable blocks = None
     let mutable rules = None
 
+    let finish (solutions : char[,] list) consoleText =
+        state <- WindowState.Waiting
+        display.Clear ()
+        for k in 0 .. 10 .. solutions.Length - 1 do 
+            for i = 0 to Array2D.length1 solutions.[k] - 1 do
+                for j = 0 to Array2D.length2 solutions.[k] - 1 do
+                    display.AppendText (string (solutions.[k].[i, j]))
+                display.AppendText(System.Environment.NewLine)
+            display.AppendText(System.Environment.NewLine + System.Environment.NewLine)
+
+        console.Text <- consoleText
+        
+    /// Change the state to graphical solving so that every iteration produces a new step in the graphical solving algorithm
     let changeToGraphicalSolver args =
         state <- WindowState.GraphicalSolver
 
@@ -82,6 +95,65 @@ type Window () as this =
 
         this.Controls.AddRange [| singleStep; display; console; singleStepButton |]
 
+    let recursiveSolveAndDisplay args =
+        let filename = console.Text
+        let writeums = fileToArray filename
+        let (target, blocks) = arrayToPuzzle writeums
+        rules <- Some({ rotationsAllowed = rotations.Checked; reflectionsAllowed = reflections.Checked })
+
+        let (matrix, columns) = createMatrix (target, blocks) rules.Value
+
+        timey.Start ()
+
+        let allSolutions = recursiveSolve matrix columns []
+
+        let solutions = matrixSolutionList rules.Value target blocks allSolutions
+
+        let numSolutions =
+            let divisor = 
+                match identicalBlocks blocks rules.Value with
+                | [] -> 1
+                | x -> x |> List.map (fun (_, x) -> factorial x) |> List.reduce (fun x y -> x * y)
+            solutions.Length / divisor
+
+        timey.Stop ()
+
+        let consoleText = String.Format ("\nisomorphic solutions: {0} solutions: {1}, time elapsed: {2}", (solutions.Length), (numSolutions), timey.ElapsedMilliseconds)
+        timey.Reset ()
+        finish solutions consoleText
+
+    let sudokuSolve args =
+        let n = 3
+        let initial = 
+            [|
+                [|8;0;0; 0;0;0; 0;0;0;|];
+                [|0;0;3; 6;0;0; 0;0;0;|];
+                [|0;7;0; 0;9;0; 2;0;0;|];
+
+                [|0;5;0; 0;0;7; 0;0;0;|];
+                [|0;0;0; 0;4;5; 7;0;0;|];
+                [|0;0;0; 1;0;0; 0;3;0;|];
+
+                [|0;0;1; 0;0;0; 0;6;8;|];
+                [|0;0;8; 5;0;0; 0;1;0;|];
+                [|0;9;0; 0;0;0; 4;0;0;|];
+            |] |> array2D
+
+        let (matrix, columns) = sudokuToMatrix n initial
+
+        let matrixChoices = matrix |> List.map (SudokuConverter.unMap n)
+
+        timey.Start ()
+
+        let allSolutions = recursiveSolve matrix columns [] |> solutionsToSudokus n initial
+
+        timey.Stop ()
+
+        let consoleText = String.Format("\nsolutions: {0}, time elapsed: {1}", (allSolutions.Length), timey.ElapsedMilliseconds)
+        timey.Reset ()
+        finish allSolutions consoleText
+
+    /// Sets up the program to accept a new input and new problem to solve
     let changeToWaiting () =
         this.Controls.Clear ()
         display.AutoSize <- false
@@ -89,11 +161,13 @@ type Window () as this =
         display.Location <- new Point(0, 0)
         display.ReadOnly <- true
         display.Font <- new Font("Consolas", 8.0f)
+        display.Multiline <- true
 
         console.AutoSize <- false
         console.Size <- new Size(480, 50)
         console.Location <- new Point(0, 250)
         console.Font <- new Font("Consolas", 8.0f)
+        console.Multiline <- true
 
         let graphicSolveButton = new Button ()
         graphicSolveButton.AutoSize <- true
@@ -105,11 +179,13 @@ type Window () as this =
         recursiveSolveButton.AutoSize <- true
         recursiveSolveButton.Location <- new Point(150, 300)
         recursiveSolveButton.Text <- "solve recursively"
+        recursiveSolveButton.Click.Add recursiveSolveAndDisplay
     
         let sudokuSolveButton = new Button ()
         sudokuSolveButton.AutoSize <- true
         sudokuSolveButton.Location <- new Point(300, 300)
         sudokuSolveButton.Text <- "solve a sudoku"
+        sudokuSolveButton.Click.Add sudokuSolve 
 
         reflections.Text <- "allow reflections"
         reflections.Location <- new Point(0, 350)
@@ -119,18 +195,6 @@ type Window () as this =
         rotations.Checked <- true
 
         this.Controls.AddRange [| display; console; graphicSolveButton; recursiveSolveButton; sudokuSolveButton; reflections; rotations |]
-
-    let finish (solutions : char[,] list) consoleText =
-        state <- WindowState.Waiting
-        display.Clear ()
-        for k in 0 .. 10 .. solutions.Length - 1 do 
-            for i = 0 to Array2D.length1 solutions.[k] - 1 do
-                for j = 0 to Array2D.length2 solutions.[k] - 1 do
-                    display.AppendText (string (solutions.[k].[i, j]))
-                display.AppendText(System.Environment.NewLine)
-            display.AppendText(System.Environment.NewLine + System.Environment.NewLine)
-
-        console.Text <- consoleText
 
     do
         this.Text <- "John Block Puzzle"
