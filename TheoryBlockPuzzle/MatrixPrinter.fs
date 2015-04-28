@@ -24,8 +24,8 @@ let blockLocIsBlock rules blockLoc block =
     let blockLocBlock = blockLoc |> List.map (fun x -> ((x, 'c') : Tile)) |> zeroBlock |> Set.ofList
     List.contains blockLocBlock blockConfigs
 
-/// given a target, block count, and solution, prints the solution's rows
-let printSolution target blockCount (sol : int list list) =
+/// given a target, block count, and solution, returns the partial solution as a block puzzle
+let solutionPuzzle target blockCount (sol : int list list) =
     let partial = Array2D.create (Array2D.length1 target) (Array2D.length2 target) ' '
     for row in sol do //let be visible only the tiles that are filled in the partial solution
         for i in row do
@@ -34,7 +34,10 @@ let printSolution target blockCount (sol : int list list) =
                 partial.[x, y] <- target.[x, y]
             | None ->
                 ()
-    partial |> printArray 0
+    partial
+
+let printSolution target blockCount (sol : int list list) =
+    solutionPuzzle target blockCount sol |> printArray 0
 
 let toFileMatrixAsListOfLists (matrix : ChoiceMatrix) =
     let outFile = new System.IO.StreamWriter("problemset.txt")

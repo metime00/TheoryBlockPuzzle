@@ -37,9 +37,9 @@ let matrixSolveAndPrint (args : string[]) rules =
         let (nextTree, partialSolution, newEdges) = iterateX node edges
         match partialSolution with
         | Some(sol) ->
-//            System.Console.Clear ()
-//            printSolution target blocks.Length sol
-//            System.Threading.Thread.Sleep 10
+            System.Console.Clear ()
+            printSolution target blocks.Length sol
+            System.Threading.Thread.Sleep 10
             runX nextTree newEdges
         | None ->
             node
@@ -181,7 +181,6 @@ let runWindow () =
 
 [<EntryPoint>]
 let main argv = 
-    printfn "%A" argv
     let rules = { rotationsAllowed = true; reflectionsAllowed = true }
 
     //let dedend = {matrix = [[0;1;2;]]; matrixColumns = [0;1;2;3;]; children = []; deadEnd = true}
@@ -190,9 +189,9 @@ let main argv =
 
     //matrixSolveAndPrint argv rules
     //bruteForceAndAlsoPrintSolutionStuff argv rules
-    recursiveMatrixSolveAndPrint argv rules
+    //recursiveMatrixSolveAndPrint argv rules
     //solveAll rules
-    //runWindow ()
+    runWindow ()
     //solveSudoku ()
 
     0 // return an integer exit code
